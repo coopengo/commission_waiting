@@ -1,28 +1,29 @@
 # This file is part of Tryton.  The COPYRIGHT file at the top level of
 # this repository contains the full copyright notices and license terms.
 
-
 from trytond.pool import PoolMeta, Pool
 from trytond.model import ModelView, fields
 from trytond.pyson import Eval, Bool
 from trytond.transaction import Transaction
 
 
-__all__ = ['Agent', 'Commission']
-
-
 class Agent(metaclass=PoolMeta):
     __name__ = 'commission.agent'
     waiting_account = fields.Many2One('account.account', 'Waiting Account',
         domain=[
+            ('type', '!=', None),
+            ('closed', '!=', True),
             ('company', '=', Eval('company')),
             ],
-        depends=['company'])
+        depends=['company'],
+        help="The account the agent's waiting commission amounts are posted "
+        "to.")
 
 
 class Commission(metaclass=PoolMeta):
     __name__ = 'commission'
-    waiting_move = fields.Many2One('account.move', 'Move', readonly=True)
+    waiting_move = fields.Many2One(
+        'account.move', "Waiting Move", readonly=True)
 
     @classmethod
     def __setup__(cls):
